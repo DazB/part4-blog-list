@@ -18,10 +18,16 @@ const listWithOneBlog = [
   }
 ]
 
-const singleAuthor = {
+const singleAuthorBlogs = {
   author: 'Edsger W. Dijkstra',
   blogs: 1
 }
+
+const singleAuthorLikes = {
+  author: 'Edsger W. Dijkstra',
+  likes: 5
+}
+
 
 const listWithManyBlogs = [
   {
@@ -67,9 +73,14 @@ const theFavouriteBlog = {
   __v: 0
 }
 
-const theMostAuthor = {
+const theMostAuthorBlogs = {
   author: 'bum',
   blogs: 2
+}
+
+const theMostAuthorLikes = {
+  author: 'bum',
+  likes: 110
 }
 
 describe('total likes', () => {
@@ -101,15 +112,29 @@ describe('favourite blog', () => {
 })
 
 describe('most blogs', () => {
-  test('when list has only one blog, equals that author', () => {
-    expect(listHelper.mostBlogs(listWithOneBlog)).toEqual(singleAuthor)
+  test('when list has only one blog, equals that author with 1 blog', () => {
+    expect(listHelper.mostBlogs(listWithOneBlog)).toEqual(singleAuthorBlogs)
   })
 
   test('when list has many blogs, equals author with most blogs', () => {
-    expect(listHelper.mostBlogs(listWithManyBlogs)).toEqual(theMostAuthor)
+    expect(listHelper.mostBlogs(listWithManyBlogs)).toEqual(theMostAuthorBlogs)
   })
 
   test('when list has no blogs, equals empty object', () => {
     expect(listHelper.mostBlogs([])).toEqual({})
+  })
+})
+
+describe('most likes', () => {
+  test('when list has only one blog, equals that authors likes', () => {
+    expect(listHelper.mostLikes(listWithOneBlog)).toEqual(singleAuthorLikes)
+  })
+
+  test('when list has many blogs, equals author with most blogs', () => {
+    expect(listHelper.mostLikes(listWithManyBlogs)).toEqual(theMostAuthorLikes)
+  })
+
+  test('when list has no blogs, equals empty object', () => {
+    expect(listHelper.mostLikes([])).toEqual({})
   })
 })
