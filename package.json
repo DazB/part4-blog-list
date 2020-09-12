@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "test": "jest --verbose"
   },
   "author": "",
   "license": "ISC",
@@ -17,6 +17,10 @@
   },
   "devDependencies": {
     "eslint": "^7.8.1",
+    "jest": "^26.4.2",
     "nodemon": "^2.0.4"
+  },
+  "jest": {
+    "testEnvironment": "node"
   }
 }
