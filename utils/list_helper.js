@@ -1,3 +1,5 @@
+const countBy = require('lodash/countBy')
+
 const dummy = (blogs) => {
   return 1
 }
@@ -23,8 +25,23 @@ const favouriteBlog = (blogs) => {
     : blogs.reduce(favouriteReducer, 0)
 }
 
+const mostBlogs = (blogs) => {
+  // countBy returns number of times the key was returned by iteratee, in
+  // this case, the author. Returns object.
+  const authorApprearCount = countBy(blogs.map((blog) => blog.author))
+  const mostReducer = (currentMost, authorCount) => {
+    return currentMost.blogs > authorCount[1]
+      ? currentMost
+      : { author: authorCount[0], blogs: authorCount[1] }
+  }
+  // Turn object into array of array with [["author", "authorCount"]....],
+  // and reduce that array
+  return Object.entries(authorApprearCount).reduce(mostReducer, {})
+}
+
 module.exports = {
   dummy,
   totalLikes,
-  favouriteBlog
+  favouriteBlog,
+  mostBlogs
 }
