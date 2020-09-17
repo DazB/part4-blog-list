@@ -14,7 +14,7 @@ const initialBlogs = [
     likes: 100,
   },
   {
-    title: 'bum',
+    title: 'bum2',
     author: 'bum',
     url: 'fjdlksfjdlskfjdslkjfl',
     likes: 10,
