@@ -140,6 +140,44 @@ describe('when deleting a blog', () => {
   })
 })
 
+describe('when updating a blog', () => {
+  test('the likes of a blog can be updated', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToUpdate = blogsAtStart[0]
+    const numberOfLikes = 10
+    const updatedLikes = {
+      likes: numberOfLikes
+    }
+
+    const response = await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .send(updatedLikes)
+      .expect(200)
+
+    const updatedBlog = response.body
+    const blogsAtEnd = await helper.blogsInDb()
+    const blogAtEnd = blogsAtEnd[0]
+    expect(updatedBlog.likes).toEqual(numberOfLikes)
+    expect(blogAtEnd.likes).toEqual(numberOfLikes)
+  })
+
+  test('fails with status code 400 if id invalid', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToUpdate = blogsAtStart[0]
+    const numberOfLikes = 10
+    const updatedLikes = {
+      likes: numberOfLikes
+    }
+    blogToUpdate.id = 'bum'
+
+    await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .send(updatedLikes)
+      .expect(400)
+  })
+
+})
+
 afterAll(() => {
   mongoose.connection.close()
 })
