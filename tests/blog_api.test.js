@@ -82,6 +82,31 @@ test('blog sent without likes will default to 0', async () => {
   expect(addedBlog.likes).toEqual(0)
 })
 
+test('a blog sent without title or url properties are not added', async () => {
+  const newBlogNoTitle = {
+    author: 'blogman',
+    url: 'www.blog.com',
+    likes: 10000
+  }
+  const newBlogNoURL = {
+    title: 'new blog',
+    author: 'blogman',
+    likes: 10000
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlogNoTitle)
+    .expect(400)
+    .expect('Content-Type', /application\/json/)
+
+  await api
+    .post('/api/blogs')
+    .send(newBlogNoURL)
+    .expect(400)
+    .expect('Content-Type', /application\/json/)
+})
+
 afterAll(() => {
   mongoose.connection.close()
 })
