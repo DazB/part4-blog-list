@@ -7,14 +7,34 @@ const bcrypt = require('bcrypt')
 
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const { testUser } = require('./test_helper')
 
 beforeEach(async () => {
-  await Blog.deleteMany({})
+  await User.deleteMany({})
+  const passwordHash = await bcrypt.hash(testUser.password, 10)
+  const user = new User({ username: testUser.username, passwordHash })
+  const savedUser = await user.save()
 
+  // Before each test get login auth token
+  const response = await api
+    .post('/api/login')
+    .send({
+      username: testUser.username,
+      password: testUser.password
+    })
+  testUser.token = response.body.token
+
+  await Blog.deleteMany({})
   const blogObjects = helper.initialBlogs
-    .map(blog => new Blog(blog))
-  const promiseArray = blogObjects.map(blog => blog.save())
-  await Promise.all(promiseArray)
+    .map(blog => new Blog({
+      title: blog.title,
+      author: blog.author,
+      url: blog.url,
+      likes: blog.likes,
+      user: savedUser._id
+    }))
+  const blogPromiseArray = blogObjects.map(blog => blog.save())
+  await Promise.all(blogPromiseArray)
 })
 
 describe('when there are initially some blogs saved', () => {
@@ -57,6 +77,7 @@ describe('when adding new blogs', () => {
     await api
       .post('/api/blogs')
       .send(newBlog)
+      .set('Authorization', `Bearer ${testUser.token}`)
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
@@ -79,6 +100,7 @@ describe('when adding new blogs', () => {
     await api
       .post('/api/blogs')
       .send(newBlog)
+      .set('Authorization', `Bearer ${testUser.token}`)
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
@@ -102,15 +124,32 @@ describe('when adding new blogs', () => {
     await api
       .post('/api/blogs')
       .send(newBlogNoTitle)
+      .set('Authorization', `Bearer ${testUser.token}`)
       .expect(400)
       .expect('Content-Type', /application\/json/)
 
     await api
       .post('/api/blogs')
       .send(newBlogNoURL)
+      .set('Authorization', `Bearer ${testUser.token}`)
       .expect(400)
       .expect('Content-Type', /application\/json/)
   })
+
+  test('a blog sent without an Authorization token will fail with proper status code', async () => {
+    const newBlog = {
+      title: 'new blog',
+      author: 'blogman',
+      url: 'www.blog.com',
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(401)
+      .expect('Content-Type', /application\/json/)
+  })
+
 })
 
 describe('when deleting a blog', () => {
@@ -120,6 +159,7 @@ describe('when deleting a blog', () => {
 
     await api
       .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', `Bearer ${testUser.token}`)
       .expect(204)
 
     const blogsAtEnd = await helper.blogsInDb()
@@ -135,6 +175,7 @@ describe('when deleting a blog', () => {
 
     await api
       .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', `Bearer ${testUser.token}`)
       .expect(400)
 
     const blogsAtEnd = await helper.blogsInDb()
@@ -180,15 +221,6 @@ describe('when updating a blog', () => {
 })
 
 describe('when there is initally one user in db', () => {
-  beforeEach(async () => {
-    await User.deleteMany({})
-
-    const passwordHash = await bcrypt.hash('sekret', 10)
-    const user = new User({ username: 'root', passwordHash })
-
-    await user.save()
-  })
-
   test('creation succeeds with a fresh username', async () => {
     const usersAtStart = await helper.usersInDb()
 
@@ -215,7 +247,7 @@ describe('when there is initally one user in db', () => {
     const usersAtStart = await helper.usersInDb()
 
     const newUser = {
-      username: 'root',
+      username: testUser.username,
       name: 'Superuser',
       password: 'salainen',
     }
@@ -236,8 +268,8 @@ describe('when there is initally one user in db', () => {
     const usersAtStart = await helper.usersInDb()
 
     const newUser = {
-      username: 'root',
-      name: 'Superuser',
+      username: 'bum',
+      name: 'bum',
       password: 'ah',
     }
 
@@ -257,8 +289,8 @@ describe('when there is initally one user in db', () => {
     const usersAtStart = await helper.usersInDb()
 
     const newUser = {
-      username: 'ah',
-      name: 'Superuser',
+      username: 'bu',
+      name: 'bum',
       password: 'salainen',
     }
 
@@ -278,7 +310,7 @@ describe('when there is initally one user in db', () => {
     const usersAtStart = await helper.usersInDb()
 
     const newUser = {
-      name: 'Superuser',
+      name: 'bum',
       password: 'salainen',
     }
 
